@@ -1,0 +1,1 @@
+{"description":"Token Launch Radar — make.fun token-radar-01. Ranks tokenless DeFi protocols from a cached DefiLlama snapshot and builds a static dashboard.","engines":{"node":">=22"},"name":"token-radar","private":true,"scripts":{"build":"node main.ts","start":"node main.ts"},"type":"module","version":"0.1.0"}
