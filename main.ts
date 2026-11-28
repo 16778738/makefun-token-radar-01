@@ -68,7 +68,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = process.env.OUTPUT_DIR || join(ROOT, "out");
+const OUT_DIR = process.env.MAKEFUN_OUTPUT_DIR || process.env.OUTPUT_DIR || join(ROOT, "out");
 const SNAPSHOT = join(ROOT, "data", "protocols.json");
 const TOP_N = 50;
 
@@ -303,6 +303,15 @@ function main(): void {
       </td>
     </tr>`).join("");
 
+  const top10Rows = top.slice(0, 10).map((r) => `
+    <tr>
+      <td class="rank">${r.rank}</td>
+      <td><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a></td>
+      <td>${esc(r.category)}</td>
+      <td class="num">${r.tvlUsd}</td>
+      <td class="num score">${r.score.toFixed(1)}</td>
+    </tr>`).join("");
+
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -320,6 +329,10 @@ input{padding:8px;width:100%;max-width:420px;margin-top:12px}
 <h1>Token Launch Radar</h1>
 <p class="muted">Which DeFi protocols still have no token — and what would a launch be worth?</p>
 <p><span class="pill">Snapshot: ${esc(snap.fetched_at_utc)}</span><span class="pill">Scanned: ${snap.count.toLocaleString()} DefiLlama entries (${groups.size.toLocaleString()} protocol groups)</span><span class="pill">Candidates: ${ranked.length}</span><span class="pill">Source: DefiLlama, no key</span></p>
+<p class="muted">Snapshot date: ${esc(snap.fetched_at_utc)} · Dashboard generated from that snapshot — if the snapshot is old, the board is a picture of that day, not of today.</p>
+<h2>Top 10 at a glance</h2>
+<table><thead><tr><th>#</th><th>Protocol</th><th>Category</th><th style="text-align:right">TVL</th><th style="text-align:right">Score</th></tr></thead>
+<tbody>${top10Rows}</tbody></table>
 <p>Data: <a href="https://api.llama.fi/protocols">api.llama.fi/protocols</a> (public). A protocol counts as tokenless only if <b>no</b> entry in its group has a CoinGecko id, a CoinMarketCap id, a market cap above zero, or a real symbol plus a token address. TVL is summed per protocol group so a protocol is ranked once. Excluded: TVL under $10M, CEXs, bridges, wrapped / staked products, and protocols with no public URL or description. Two manual exclusions are documented in the code: USDD (the stablecoin is itself the token) and Bittensor dTAO (TAO already trades).</p>
 <h2>How the score works — Launch Value Score, 0–100</h2>
 <p><b>TVL 50</b> — 50 × clamp((log<sub>10</sub>(TVL) − 7) / 2, 0, 1): $10M → 0, $100M → 25, $1B → 50. <b>Breadth 15</b> — 15 × min(chains, 5) / 5. <b>Category 20 / 18 / 15 / 10</b> — 20 for Prediction Market, Lending, Dexs, Derivatives, Restaking, Collateral Markets, Perps; 18 for Uncollateralized Lending; 15 for Yield, Yield Aggregator, RWA, Basis Trading; 10 otherwise. <b>Momentum 10</b> — 5 + 5 × clamp(7-day TVL change / 20, −1, 1). <b>Trust 5</b> — 5 if audits &gt; 0. Click any row for the detail view and farming steps.</p>
