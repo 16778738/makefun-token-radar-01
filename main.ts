@@ -273,7 +273,7 @@ function main(): void {
   mkdirSync(OUT_DIR, { recursive: true });
   writeFileSync(join(OUT_DIR, "ranked.json"), JSON.stringify({
     competition: "token-radar-01",
-    generated_at_utc: new Date().toISOString(),
+    generated_at_utc: snap.fetched_at_utc,
     snapshot_at_utc: snap.fetched_at_utc,
     source: snap.source,
     scanned_protocols: snap.count,
